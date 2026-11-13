@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kitcut40.github.io/balisim/schemas/balisim-ammo.schema.json",
+  "title": "Profil de munition BALISIM (format balisim-ammo v1)",
+  "type": "object",
+  "required": ["format", "version", "name", "projectile", "muzzle", "table_flat_fire"],
+  "properties": {
+    "format": { "const": "balisim-ammo" },
+    "version": { "const": 1 },
+    "generator": { "type": "string" },
+    "name": { "type": "string" },
+    "projectile": {
+      "type": "object",
+      "required": ["mass_kg", "diameter_m", "cd_vs_mach"],
+      "properties": {
+        "mass_kg": { "type": "number", "exclusiveMinimum": 0 },
+        "diameter_m": { "type": "number", "exclusiveMinimum": 0 },
+        "length_m": { "type": "number" },
+        "drag_model": { "type": "object" },
+        "cd_vs_mach": {
+          "description": "Couples [Mach, Cd] effectifs du projectile, pour intégrer la trajectoire dans le jeu",
+          "type": "array",
+          "items": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "minItems": 2, "maxItems": 2 }
+        },
+        "stability": { "type": ["object", "null"] },
+        "spin_rpm": { "type": "number" },
+        "backspin_rpm": { "type": "number" }
+      }
+    },
+    "muzzle": {
+      "type": "object",
+      "required": ["velocity_ms"],
+      "properties": {
+        "velocity_ms": { "type": "number" },
+        "energy_j": { "type": "number" },
+        "peak_pressure_mpa": { "type": "number" },
+        "barrel_time_ms": { "type": "number" },
+        "powder_burnt_pct": { "type": "number" }
+      }
+    },
+    "recoil": { "type": "object" },
+    "max_range": { "type": "object" },
+    "environment": { "type": "object" },
+    "target": { "type": ["object", "null"] },
+    "table_flat_fire": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["distance_m", "time_s", "velocity_ms", "energy_j", "drop_m"],
+        "properties": {
+          "distance_m": { "type": "number" },
+          "time_s": { "type": "number" },
+          "velocity_ms": { "type": "number" },
+          "energy_j": { "type": "number" },
+          "drop_m": { "type": "number" },
+          "drift_m": { "type": "number" }
+        }
+      }
+    },
+    "config": { "type": "object", "description": "Scénario complet (réimportable dans BALISIM)" }
+  }
+}

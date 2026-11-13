@@ -1,0 +1,10 @@
+[package]
+name = "balisim-devbridge"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+description = "Dev-only: runs the core natively for the Vite dev server (stdin JSON -> stdout JSON)"
+
+[dependencies]
+balisim-core = { path = "../core" }

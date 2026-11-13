@@ -1,0 +1,10 @@
+[package]
+name = "balisim-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "BALISIM physics core: interior, exterior and terminal ballistics"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

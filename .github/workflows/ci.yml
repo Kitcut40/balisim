@@ -1,0 +1,60 @@
+# Tests the physics core, builds the WebAssembly engine and the web app,
+# then publishes the site to the gh-pages branch (GitHub Pages).
+name: CI web
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust + cible WebAssembly
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Tests de validation du moteur
+        run: cargo test -p balisim-core --release -- --nocapture --test-threads=1
+
+      - name: Installer wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Compiler le moteur en WebAssembly
+        run: wasm-pack build crates/wasm --release --target web --out-dir ../../app/src/engine/pkg --out-name balisim_wasm
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Construire le site
+        working-directory: app
+        run: |
+          npm ci
+          npm run build
+          touch dist/.nojekyll
+
+      - name: Publier sur GitHub Pages (branche gh-pages)
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: app/dist
+          publish_branch: gh-pages
+          force_orphan: true

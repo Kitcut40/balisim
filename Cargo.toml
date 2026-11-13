@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+exclude = ["app/src-tauri"]
+members = ["crates/core", "crates/wasm", "crates/devbridge"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/Kitcut40/balisim"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

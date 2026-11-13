@@ -1,0 +1,77 @@
+# Builds the Windows application (.exe installer + portable .exe) with Tauri.
+# Every push to main: downloadable artifact. Every tag v*: GitHub Release.
+name: Windows exe
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            . -> target
+            app/src-tauri -> target
+
+      - name: Installer wasm-pack
+        run: cargo install wasm-pack --locked
+
+      - name: Compiler le moteur en WebAssembly
+        run: wasm-pack build crates/wasm --release --target web --out-dir ../../app/src/engine/pkg --out-name balisim_wasm
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Dépendances
+        working-directory: app
+        run: npm ci
+
+      - name: Construire l'application Windows
+        working-directory: app
+        run: npx tauri build
+
+      - name: Rassembler les fichiers
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path out | Out-Null
+          Copy-Item app/src-tauri/target/release/balisim-desktop.exe out/BALISIM-portable.exe
+          Get-ChildItem app/src-tauri/target/release/bundle/nsis/*.exe | ForEach-Object { Copy-Item $_.FullName out/BALISIM-installateur.exe }
+
+      - name: Artefact téléchargeable
+        uses: actions/upload-artifact@v4
+        with:
+          name: BALISIM-windows
+          path: out/*.exe
+
+      - name: Publier la version (tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.exe
+          name: BALISIM ${{ github.ref_name }}
+          body: |
+            BALISIM ${{ github.ref_name }} pour Windows.
+            - `BALISIM-installateur.exe` : installe le logiciel (menu Démarrer).
+            - `BALISIM-portable.exe` : se lance directement, sans installation.
+            Version web : https://kitcut40.github.io/balisim/
