@@ -1,5 +1,5 @@
 # Builds the Windows application (.exe installer + portable .exe) with Tauri.
-# Every push to main: downloadable artifact. Every tag v*: GitHub Release.
+# Every push to main updates the "derniere-version" GitHub Release; tags v* get their own release.
 name: Windows exe
 
 on:
@@ -64,14 +64,18 @@ jobs:
           name: BALISIM-windows
           path: out/*.exe
 
-      - name: Publier la version (tag)
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Publier la dernière version (Releases)
+        if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
           files: out/*.exe
-          name: BALISIM ${{ github.ref_name }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'derniere-version' }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ startsWith(github.ref, 'refs/tags/v') && format('BALISIM {0}', github.ref_name) || 'BALISIM — dernière version' }}
+          make_latest: true
+          overwrite_files: true
           body: |
-            BALISIM ${{ github.ref_name }} pour Windows.
+            BALISIM pour Windows (construit automatiquement depuis `main`, commit ${{ github.sha }}).
             - `BALISIM-installateur.exe` : installe le logiciel (menu Démarrer).
             - `BALISIM-portable.exe` : se lance directement, sans installation.
             Version web : https://kitcut40.github.io/balisim/
