@@ -81,7 +81,10 @@ fn project_40mm_all_configurations() {
     // Dimpled nose keeps more speed at 30 m than smooth with the same propulsion.
     let loss = |id: &str| v30[id].0 - v30[id].1;
     assert!(loss("40-pak-alveole") < loss("40-pak-lisse"));
-    assert!(v30["40-rk-lisse"].0 > v30["40-pak-lisse"].0, "le R.K. (plus chargé) doit être plus rapide");
+    // Same powder charge: P.A.K. and R.K. must give nearly the same velocity
+    // (published charges overlap: 150-211 mg for both types).
+    let (pak, rk) = (v30["40-pak-lisse"].0, v30["40-rk-lisse"].0);
+    assert!((rk - pak).abs() / pak < 0.03, "P.A.K. {pak:.1} vs R.K. {rk:.1}");
 }
 
 #[test]
