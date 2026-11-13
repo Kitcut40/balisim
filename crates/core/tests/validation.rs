@@ -121,3 +121,19 @@ fn hop_up_extends_airsoft_range() {
     let r1 = exterior::simulate(&p, &env, &mk(60_000.0), stop).range;
     assert!(r1 > r0 * 1.3, "sans hop-up {r0:.1} m, avec {r1:.1} m");
 }
+
+#[test]
+fn zone_effects_grow_with_energy() {
+    use balisim_core::terminal::zone_effects;
+    let mut last = zone_effects(0.0);
+    assert!(!last.head.unconscious);
+    for dmg in [20.0, 40.0, 60.0, 80.0, 100.0] {
+        let z = zone_effects(dmg);
+        assert!(z.torso.hp_loss_pct > last.torso.hp_loss_pct);
+        assert!(z.groin.hp_loss_pct >= z.torso.hp_loss_pct);
+        assert!(z.legs.move_slow_s > last.legs.move_slow_s);
+        assert!(z.arms.weapon_disabled_s > last.arms.weapon_disabled_s);
+        last = z;
+    }
+    assert!(last.head.unconscious && last.arms.drops_weapon);
+}

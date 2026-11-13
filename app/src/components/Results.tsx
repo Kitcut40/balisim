@@ -86,6 +86,20 @@ export default function Results({ r, s, units, simple, t, lang }: Props) {
         )}
       </div>
 
+      {r.hit && (
+        <div className="card fx">
+          <h3>{t('fx_title')}</h3>
+          <table className="kv"><tbody>
+            <Row k={t('fx_head')} v={r.hit.zones.head.unconscious ? t('fx_ko', { d: fmt(r.hit.zones.head.duration_s, 0, lang) }) : t('fx_dazed', { d: fmt(r.hit.zones.head.duration_s, 0, lang) })} />
+            <Row k={t('fx_torso')} v={t('fx_body', { hp: fmt(r.hit.zones.torso.hp_loss_pct, 0, lang), v: fmt(r.hit.zones.torso.vision_blur_s, 0, lang), m: fmt(r.hit.zones.torso.move_slow_pct, 0, lang), ms: fmt(r.hit.zones.torso.move_slow_s, 0, lang) })} />
+            <Row k={t('fx_groin')} v={t('fx_body', { hp: fmt(r.hit.zones.groin.hp_loss_pct, 0, lang), v: fmt(r.hit.zones.groin.vision_blur_s, 0, lang), m: fmt(r.hit.zones.groin.move_slow_pct, 0, lang), ms: fmt(r.hit.zones.groin.move_slow_s, 0, lang) })} />
+            <Row k={t('fx_legs')} v={t('fx_legs_txt', { m: fmt(r.hit.zones.legs.move_slow_pct, 0, lang), ms: fmt(r.hit.zones.legs.move_slow_s, 0, lang), ns: fmt(r.hit.zones.legs.no_sprint_s, 0, lang) })} />
+            <Row k={t('fx_arms')} v={t('fx_arms_txt', { w: fmt(r.hit.zones.arms.weapon_disabled_s, 0, lang) }) + (r.hit.zones.arms.drops_weapon ? t('fx_drop') : '')} />
+          </tbody></table>
+          <p className="note">{t('fx_note', { s: fmt(r.hit.zones.severity * 100, 0, lang) })}</p>
+        </div>
+      )}
+
       <div className="card">
         <h3>{t('r_interior')}</h3>
         <table className="kv"><tbody>

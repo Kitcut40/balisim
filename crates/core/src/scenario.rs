@@ -8,7 +8,7 @@ use crate::exterior::{self, Environment, Launch, Point, Projectile, Stop};
 use crate::interior::{self, InteriorConfig, InteriorResult, Layout};
 use crate::powder::{GrainShape, Powder, Quality};
 use crate::stability::miller_sg;
-use crate::terminal::{self, Impact};
+use crate::terminal::{self, Impact, ZoneEffects};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -231,6 +231,8 @@ pub struct HitOut {
     pub elevation_deg: f64,
     pub point: Point,
     pub impact: Impact,
+    /// Game effects per body zone at the target.
+    pub zones: ZoneEffects,
     pub points: Vec<Point>,
     /// Drop at the target for a flat shot (m).
     pub flat_drop: f64,
@@ -471,6 +473,7 @@ pub fn run(input: &ScenarioInput, powders: &[PowderUser]) -> ScenarioResult {
                 elevation_deg: h.elevation_deg,
                 point: h.point,
                 impact: imp,
+                zones: terminal::zone_effects(imp.game_damage),
                 points: decimate(&h.trajectory.points, 600),
                 flat_drop,
             });

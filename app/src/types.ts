@@ -146,6 +146,16 @@ export interface Impact {
   penetrating: boolean;
 }
 
+export interface BodyEffect { hp_loss_pct: number; vision_blur_s: number; move_slow_pct: number; move_slow_s: number }
+export interface ZoneEffects {
+  severity: number;
+  head: { unconscious: boolean; duration_s: number };
+  torso: BodyEffect;
+  groin: BodyEffect;
+  legs: { move_slow_pct: number; move_slow_s: number; no_sprint_s: number };
+  arms: { weapon_disabled_s: number; drops_weapon: boolean };
+}
+
 export interface TableRow {
   distance: number;
   time: number;
@@ -175,7 +185,7 @@ export interface ScenarioResult {
   max_range_apex: number;
   max_range_impact_v: number;
   max_range_points: Point[];
-  hit: { elevation_deg: number; point: Point; impact: Impact; points: Point[]; flat_drop: number } | null;
+  hit: { elevation_deg: number; point: Point; impact: Impact; zones: ZoneEffects; points: Point[]; flat_drop: number } | null;
   table: TableRow[];
   recoil: { velocity: number; energy: number; momentum: number } | null;
   flight_drag: DragModel | null;
